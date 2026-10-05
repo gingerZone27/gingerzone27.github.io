@@ -14,13 +14,3 @@ Edit `profile.js` to add your name, affiliation, biography, professional links, 
 4. GitHub will display the published URL on that settings page after deployment completes.
 
 This site has no build step or package dependencies. Relative asset paths support both primary and project GitHub Pages URLs.
-
-## Local preview
-
-Run `python3 -m http.server 4173 --bind 127.0.0.1` in this directory, then open http://127.0.0.1:4173.
-
-## Content sources and review
-
-Publications were selected from Junjie Yang’s [Google Scholar profile](https://scholar.google.com/citations?user=JWDziWkAAAAJ). Biography is a draft based on the [TUM doctoral dissertation](https://mediatum.ub.tum.de/doc/1783770/1783770.pdf) and the author biography in [TUM research materials](https://mediatum.ub.tum.de/doc/1783951/zpk3t3gm2fih7ypw5nh2wzroo.Satoshi%20Inagaki.pdf). Please review the biography before any future publication. No current job rank or contact email has been inferred. A monogram is used until you choose a portrait.
-
-This version is local only; nothing has been published.
