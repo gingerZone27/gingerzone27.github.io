@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Academic profile, research biography, and selected publications.">
+  <title>Junjie Yang — Academic profile</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="profile.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header">
+    <a class="wordmark" href="#personal" aria-label="Personal information"><span id="initials">JY</span><span class="wordmark-label">Junjie Yang</span></a>
+    <nav aria-label="Main navigation">
+      <a href="#personal" aria-current="location">Personal info</a>
+      <a href="#research">Research biography</a>
+      <a href="#publications">Selected publications</a>
+    </nav>
+  </header>
+  <main id="main">
+    <section id="personal" class="section personal" aria-labelledby="name">
+      <div class="section-label"><span>01</span> Personal info</div>
+      <div class="personal-grid">
+        <div class="reveal"><p class="eyebrow" id="role"></p><h1 id="name">Junjie Yang</h1><p class="affiliation" id="affiliation"></p><p class="intro" id="intro"></p><div id="links" class="profile-links"></div></div>
+        <div class="portrait-wrap reveal"><img id="portrait" alt="" hidden><div class="monogram" id="monogram" aria-hidden="true">JY</div><p id="location" class="location"></p></div>
+      </div>
+      <a class="next-section" href="#research">Explore my research <span aria-hidden="true">↓</span></a>
+    </section>
+    <section id="research" class="section" aria-labelledby="research-title">
+      <div class="section-label"><span>02</span> Research biography</div>
+      <div class="research-grid"><h2 id="research-title" class="reveal">Research<br>&amp; biography<span class="accent">.</span></h2><div class="reveal"><div id="biography" class="biography"></div><ul id="interests" class="interests" aria-label="Research interests"></ul></div></div>
+    </section>
+    <section id="publications" class="section" aria-labelledby="publications-title">
+      <div class="section-label"><span>03</span> Selected publications</div>
+      <div class="publications-heading reveal"><h2 id="publications-title">Selected<br>publications<span class="accent">.</span></h2><span id="publication-count" class="selection-note"></span></div>
+      <ol id="publication-list" class="publication-list"></ol>
+      <p id="empty-publications" class="empty-copy" hidden>Selected publications will appear here.</p>
+    </section>
+  </main>
+  <footer><span id="footer-name">Junjie Yang</span><a href="#personal">Back to top <span aria-hidden="true">↑</span></a></footer>
+</body>
+</html>
