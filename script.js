@@ -3,25 +3,16 @@
   const profile = window.academicProfile;
   if (!profile) return;
   const set = (id, text) => { document.getElementById(id).textContent = text || ""; };
-  const safeURL = (value, image = false) => {
+  const safeURL = value => {
     try {
       const url = new URL(value, document.baseURI);
-      return (image ? ["http:", "https:"] : ["http:", "https:", "mailto:"]).includes(url.protocol) ? url.href : null;
+      return ["http:", "https:", "mailto:"].includes(url.protocol) ? url.href : null;
     } catch { return null; }
   };
   set("name", profile.name); set("role", profile.role); set("affiliation", profile.affiliation);
-  set("intro", profile.intro); set("location", profile.location); set("footer-name", profile.name);
-  set("initials", profile.initials); set("monogram", profile.initials);
+  set("intro", profile.intro);
   document.title = `${profile.name} — Academic profile`;
   document.querySelector('meta[name="description"]').content = profile.intro || "Academic profile, research biography, and selected publications.";
-  if (profile.portrait) {
-    const url = safeURL(profile.portrait, true);
-    if (url) {
-      const image = document.getElementById("portrait");
-      image.addEventListener("load", () => { image.hidden = false; document.getElementById("monogram").hidden = true; });
-      image.src = url; image.alt = `Portrait of ${profile.name}`;
-    }
-  }
   for (const item of profile.links || []) {
     const url = safeURL(item.url); if (!url) continue;
     const a = document.createElement("a"); a.href = url; a.textContent = item.label;
@@ -35,7 +26,6 @@
     const li = document.createElement("li"); li.textContent = interest; document.getElementById("interests").append(li);
   }
   const publications = (profile.publications || []).slice(0, 10);
-  set("publication-count", publications.length ? `${publications.length} selected works` : "");
   document.getElementById("empty-publications").hidden = publications.length > 0;
   for (const paper of publications) {
     const li = document.createElement("li"); li.className = "publication reveal";
@@ -52,26 +42,95 @@
     }
     const url = safeURL(paper.url);
     if (paper.url && url) { const a = document.createElement("a"); a.href = url; a.className = "paper-link"; a.textContent = "Read publication ↗"; a.setAttribute("aria-label", `Read ${paper.title}`); body.append(a); }
-    const year = document.createElement("span"); year.className = "year"; year.textContent = paper.year || "";
-    li.append(body, year); document.getElementById("publication-list").append(li);
+    if (paper.year) {
+      body.querySelector(".venue").append(document.createTextNode(`, ${paper.year}`));
+    }
+    li.append(body); document.getElementById("publication-list").append(li);
   }
-  if (!("IntersectionObserver" in window)) return;
-  document.documentElement.classList.add("js");
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add("visible"); observer.unobserve(entry.target); } });
-  }, { threshold: 0.05 });
-  document.querySelectorAll(".reveal").forEach(element => observer.observe(element));
-  const navLinks = [...document.querySelectorAll("nav a")];
   const sections = [...document.querySelectorAll("main section")];
-  let scheduled = false;
-  const updateNavigation = () => {
-    const offset = document.querySelector("header").getBoundingClientRect().bottom + 90;
-    let current = sections[0];
-    for (const section of sections) if (section.getBoundingClientRect().top <= offset) current = section;
-    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = sections[sections.length - 1];
-    navLinks.forEach(a => { if (a.hash === `#${current.id}`) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current"); });
-    scheduled = false;
+  const navLinks = [...document.querySelectorAll("nav a")];
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const resolveSection = hash => sections.find(section => `#${section.id}` === hash);
+  let currentSection = resolveSection(window.location.hash) || sections[0];
+  let navigationVersion = 0;
+  const animations = new Set();
+  const markCurrentPage = () => {
+    navLinks.forEach(link => {
+      if (link.hash === `#${currentSection.id}`) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
   };
-  window.addEventListener("scroll", () => { if (!scheduled) { scheduled = true; requestAnimationFrame(updateNavigation); } }, { passive: true });
-  window.addEventListener("resize", updateNavigation); updateNavigation();
+  const focusPage = section => {
+    section.setAttribute("tabindex", "-1");
+    section.focus({ preventScroll: true });
+  };
+  const animate = async (section, frames, duration) => {
+    const animation = section.animate(frames, {
+      duration, easing: "cubic-bezier(.22,.7,.24,1)", fill: "none"
+    });
+    animations.add(animation);
+    try { await animation.finished; } catch { /* A newer navigation cancels this animation. */ }
+    finally { animations.delete(animation); }
+  };
+  const navigate = async (target, { updateHistory = false, moveFocus = false } = {}) => {
+    const version = ++navigationVersion;
+    for (const animation of animations) animation.cancel();
+    if (updateHistory && window.location.hash !== `#${target.id}`) {
+      history.pushState(null, "", `#${target.id}`);
+    }
+    const canAnimate = !reducedMotion.matches && typeof target.animate === "function";
+    if (target !== currentSection) {
+      if (canAnimate) {
+        await animate(currentSection, [
+          { opacity: 1, transform: "translateY(0) scale(1)" },
+          { opacity: 0, transform: "translateY(7px) scale(.99)", boxShadow: "inset 6px 6px 16px #c6ced1, inset -6px -6px 16px #ffffff" }
+        ], 160);
+      }
+      if (version !== navigationVersion) return;
+      currentSection = target;
+      sections.forEach(section => { section.hidden = section !== target; });
+      markCurrentPage();
+      window.scrollTo({ top: 0, behavior: "instant" });
+      // The page itself animates; visible content should not wait on a second reveal.
+      target.querySelectorAll(".reveal").forEach(element => {
+        if (element.getBoundingClientRect().top < window.innerHeight) element.classList.add("visible");
+      });
+      if (canAnimate) {
+        await animate(target, [
+          { opacity: 0, transform: "translateY(14px) scale(.99)", boxShadow: "0px 0px 0px #c6ced1, 0px 0px 0px #ffffff" },
+          { opacity: 1, transform: "translateY(0) scale(1)", boxShadow: getComputedStyle(target).boxShadow }
+        ], 430);
+      }
+    } else window.scrollTo({ top: 0, behavior: reducedMotion.matches ? "instant" : "smooth" });
+    if (version === navigationVersion && moveFocus) focusPage(target);
+  };
+  sections.forEach(section => { section.hidden = section !== currentSection; });
+  markCurrentPage();
+  document.addEventListener("click", event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[href^="#"]');
+    const target = link && resolveSection(link.hash);
+    if (!target) return;
+    event.preventDefault();
+    navigate(target, { updateHistory: true, moveFocus: true });
+  });
+  // Hash changes also cover browser Back/Forward and direct section links.
+  window.addEventListener("hashchange", () => {
+    navigate(resolveSection(window.location.hash) || sections[0], { moveFocus: true });
+  });
+  // Returning from a long publication page must restore the selected page at the top.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.scrollTo({ top: 0, behavior: "instant" });
+  if ("IntersectionObserver" in window) {
+    document.documentElement.classList.add("js");
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05 });
+    document.querySelectorAll(".reveal").forEach(element => observer.observe(element));
+  }
 })();

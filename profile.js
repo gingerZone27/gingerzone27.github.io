@@ -6,7 +6,7 @@ window.academicProfile = {
   "affiliation": "Technical University of Munich",
   "intro": "I study robotic perception and automation for ophthalmic surgery, with a focus on image-guided navigation and precision interventions.",
   "location": "Munich, Germany",
-  "portrait": "",
+  "portrait": "assets/portrait.jpg",
   "links": [
     {
       "label": "Google Scholar",
