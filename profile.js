@@ -1,10 +1,10 @@
 // Edit your profile and selected publications here. Only the first 10 publications are displayed.
 window.academicProfile = {
   "name": "Junjie Yang",
+  "title": "Dr. rer. nat. · Postdoc",
   "initials": "JY",
   "role": "Robotics · Ophthalmic automation · Real-time systems",
   "affiliation": "Technical University of Munich",
-  "intro": "I study robotic perception and automation for ophthalmic surgery, with a focus on image-guided navigation and precision interventions.",
   "location": "Munich, Germany",
   "portrait": "assets/portrait.jpg",
   "links": [

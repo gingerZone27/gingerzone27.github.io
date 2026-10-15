@@ -2,14 +2,15 @@
   "use strict";
   const profile = window.academicProfile;
   if (!profile) return;
-  const set = (id, text) => { document.getElementById(id).textContent = text || ""; };
+  // Empty fields are hidden so they leave no gap in the layout.
+  const set = (id, text) => { const element = document.getElementById(id); element.textContent = text || ""; element.hidden = !text; };
   const safeURL = value => {
     try {
       const url = new URL(value, document.baseURI);
       return ["http:", "https:", "mailto:"].includes(url.protocol) ? url.href : null;
     } catch { return null; }
   };
-  set("name", profile.name); set("role", profile.role); set("affiliation", profile.affiliation);
+  set("name", profile.name); set("title", profile.title); set("role", profile.role); set("affiliation", profile.affiliation);
   set("intro", profile.intro);
   document.title = `${profile.name} — Academic profile`;
   document.querySelector('meta[name="description"]').content = profile.intro || "Academic profile, research biography, and selected publications.";
@@ -47,6 +48,28 @@
     }
     li.append(body); document.getElementById("publication-list").append(li);
   }
+  // Paper titles shrink together, down to 15px, until each fits on two lines at the current width.
+  // Where even 15px cannot do that (phones), shrinking would only cost legibility, so titles keep their normal size.
+  const publicationList = document.getElementById("publication-list");
+  const paperTitles = [...publicationList.querySelectorAll(".publication h3")];
+  let fittedWidth = 0;
+  const fitPaperTitles = () => {
+    const width = publicationList.clientWidth;
+    if (!width || width === fittedWidth || !paperTitles.length) return;
+    fittedWidth = width;
+    publicationList.style.removeProperty("--title-size");
+    const lineCount = title => Math.round(title.offsetHeight / parseFloat(getComputedStyle(title).lineHeight));
+    let size = parseFloat(getComputedStyle(paperTitles[0]).fontSize);
+    const overflows = () => paperTitles.some(title => lineCount(title) > 2);
+    while (size > 15 && overflows()) {
+      size -= 0.5;
+      publicationList.style.setProperty("--title-size", `${size}px`);
+    }
+    if (overflows()) publicationList.style.removeProperty("--title-size");
+  };
+  // The list is measured once it is shown and again whenever its width changes.
+  if ("ResizeObserver" in window) new ResizeObserver(fitPaperTitles).observe(publicationList);
+  document.fonts?.ready.then(() => { fittedWidth = 0; fitPaperTitles(); });
   const sections = [...document.querySelectorAll("main section")];
   const navLinks = [...document.querySelectorAll("nav a")];
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");

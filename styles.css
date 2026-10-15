@@ -13,8 +13,12 @@
   --shadow:#c6ced1;
   --light:#ffffff;
   --raised:10px 10px 24px var(--shadow),-10px -10px 24px var(--light);
-  --pressed:inset 4px 4px 9px #c6cfd2,inset -4px -4px 9px #ffffff;
-  --small-raised:4px 4px 9px #c6cfd2,-4px -4px 9px #ffffff;
+  /* Every control state uses the same four layers (two outer, two inset) so raised and concave states animate into each other. */
+  --no-shadow:0 0 0 transparent;
+  --small-raised:3px 3px 6px #c6cfd2,-3px -3px 6px #ffffff,inset 0 0 0 transparent,inset 0 0 0 transparent;
+  --flat:var(--no-shadow),var(--no-shadow),inset 0 0 0 transparent,inset 0 0 0 transparent;
+  --half-raised:1.5px 1.5px 3px #c6cfd2,-1.5px -1.5px 3px #ffffff,inset 0 0 0 transparent,inset 0 0 0 transparent;
+  --pressed:var(--no-shadow),var(--no-shadow),inset 3px 3px 6px #c6cfd2,inset -3px -3px 6px #ffffff;
   --max:1160px;
   color-scheme:light;
 }
@@ -30,10 +34,11 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:5px}
 .skip-link:focus{top:10px}
 .header{max-width:var(--max);width:88%;margin:40px auto 36px;display:flex;align-items:center;justify-content:space-between;gap:30px}
 .header nav{display:flex;width:100%;gap:8px;padding:7px;border-radius:20px;box-shadow:var(--pressed)}
-.header nav a{display:flex;flex:1;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;padding:11px 17px;border-radius:14px;font-size:14px;color:var(--muted);transition:color .2s,box-shadow .3s,background .3s,transform .2s}
+.header nav a{display:flex;flex:1;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;padding:11px 17px;border-radius:14px;font-size:17px;color:var(--muted);box-shadow:var(--flat);transition:color .2s,box-shadow .3s,background .3s,transform .2s}
 .header nav a[aria-current],.header nav a[aria-current]:hover{color:var(--green-light);background:linear-gradient(135deg,#f0f3f4,#e5e9ea);box-shadow:var(--small-raised);border-color:#f5f7f7;font-weight:700}
 .header nav a:hover{color:var(--accent)}
-.header nav a:active{box-shadow:var(--pressed);transform:scale(.98)}
+.header nav a:not([aria-current]):focus-visible{box-shadow:var(--half-raised)}
+.header nav a:active{box-shadow:var(--small-raised)}
 main{max-width:var(--max);margin:auto;width:88%}
 main{position:relative}
 .section{padding:48px 54px 50px;margin-bottom:38px;border:1px solid rgba(255,255,255,.7);border-radius:30px;background:linear-gradient(135deg,#edf0f1,var(--surface) 65%);box-shadow:var(--raised);scroll-margin-top:30px;transform-origin:50% 80px}
@@ -41,12 +46,14 @@ main{position:relative}
 h1,h2{font-weight:400;letter-spacing:-.045em;line-height:1.1;margin:0}
 .profile-name{font-size:clamp(32px,3.3vw,44px);overflow-wrap:anywhere}
 h2{font-size:clamp(38px,4vw,54px)}
+.profile-title{margin:16px 0 0;font-size:18px}
 .affiliation{margin:24px 0 0;color:var(--muted);font-size:17px}
+.profile-title+.affiliation{margin-top:4px}
 .intro{max-width:760px;margin:20px 0 0;font-size:20px;line-height:1.65}
 .profile-links{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
-.profile-links a{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:12px;background:var(--surface);box-shadow:var(--small-raised);padding:10px 16px;font-size:14px;transition:box-shadow .2s,transform .2s,color .2s}
-.profile-links a:hover{transform:translateY(-2px)}
-.profile-links a:active{box-shadow:var(--pressed);transform:translateY(0)}
+.profile-links a{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:12px;background:var(--surface);box-shadow:var(--flat);padding:10px 16px;font-size:14px;transition:box-shadow .3s,color .2s}
+.profile-links a:focus-visible{box-shadow:var(--half-raised)}
+.profile-links a:active{box-shadow:var(--small-raised)}
 .profile-links a span{color:var(--accent)}
 .accent{color:var(--accent)}
 .biography p{margin:0 0 22px}
@@ -55,10 +62,17 @@ h2{font-size:clamp(38px,4vw,54px)}
 .publication-list{list-style:none;counter-reset:papers;margin:0;padding:0;display:grid;gap:22px}
 .publication{counter-increment:papers;display:grid;grid-template-columns:24px minmax(0,1fr);gap:14px;padding:24px;position:relative;border:1px solid #f4f6f7;border-radius:20px;box-shadow:6px 6px 15px #cdd5d7,-6px -6px 15px #fff;background:var(--surface)}
 .publication:before{content:counter(papers,decimal-leading-zero);font-size:12px;color:var(--muted);padding-top:5px;font-variant-numeric:tabular-nums}
-.publication h3{font-size:19px;font-weight:700;line-height:1.45;margin:0 0 11px;letter-spacing:-.015em}
+.publication h3{font-size:var(--title-size,19px);font-weight:700;line-height:1.45;margin:0 0 11px;letter-spacing:-.015em}
 .authors,.venue{font-size:14px;line-height:1.7;margin:5px 0;color:var(--muted)}
 .venue{color:var(--accent)}
-.paper-link{display:inline-block;margin-top:14px;padding:9px 14px;border-radius:12px;font-size:13px;color:var(--accent);background:linear-gradient(135deg,#f0f3f4,#e5e9ea);box-shadow:var(--small-raised);text-decoration:none;transition:color .2s}
+.paper-link{display:inline-block;margin-top:14px;padding:9px 14px;border-radius:12px;font-size:13px;color:var(--accent);background:linear-gradient(135deg,#f0f3f4,#e5e9ea);box-shadow:var(--flat);text-decoration:none;transition:color .2s,box-shadow .3s}
+.paper-link:focus-visible{box-shadow:var(--half-raised)}
+.paper-link:active{box-shadow:var(--small-raised)}
+/* Hover lifts a control half way; a click or the selected page lifts it fully. Touch screens skip hover so a tapped control does not stay lifted like the selected page. */
+@media(hover:hover){
+  .header nav a:not([aria-current]):hover,.profile-links a:hover,.paper-link:hover{box-shadow:var(--half-raised)}
+  .header nav a:not([aria-current]):active,.profile-links a:active,.paper-link:active{box-shadow:var(--small-raised)}
+}
 .profile-links a:is(:hover,:focus-visible),.interests li:hover,.paper-link:is(:hover,:focus-visible){color:var(--orange-light)}
 .profile-links a:is(:hover,:focus-visible) span{color:inherit}
 .empty-copy{color:var(--muted)}
@@ -66,7 +80,7 @@ h2{font-size:clamp(38px,4vw,54px)}
 .js .reveal.visible{opacity:1;transform:translateY(0)}
 @media(min-width:1500px){.header{margin-top:55px}.section{padding-top:56px;padding-bottom:56px}}
 @media(max-width:1050px){.header{flex-wrap:wrap;gap:26px;margin-top:28px}.header nav{width:100%}.header nav a{flex:1}.section{padding:36px}.profile-links{gap:12px}.profile-links a{padding:9px 13px}}
-@media(max-width:700px){.header{margin-bottom:26px}.section{padding:28px;border-radius:24px;margin-bottom:28px}.intro{font-size:18px}.eyebrow{font-size:12px}.header nav a{font-size:12px;padding:11px 8px;gap:6px}.publication{grid-template-columns:24px minmax(0,1fr);gap:12px;padding:22px;position:relative}.publication h3{font-size:18px}}
-@media(max-width:420px){main,.header{width:90%}.section{padding:23px 20px}.header nav{gap:3px;padding:6px;border-radius:16px}.header nav a{font-size:11px;padding:12px 7px;border-radius:11px}.profile-links{gap:12px}.profile-links a{font-size:12px;padding:9px 12px}.publication{padding:18px 14px;gap:9px}.authors,.venue{font-size:13px}}
+@media(max-width:700px){.header{margin-bottom:26px}.section{padding:28px;border-radius:24px;margin-bottom:28px}.intro{font-size:18px}.eyebrow{font-size:12px}.header nav a{font-size:15px;padding:11px 8px;gap:6px}.publication{grid-template-columns:24px minmax(0,1fr);gap:12px;padding:22px;position:relative}.publication h3{font-size:var(--title-size,18px)}}
+@media(max-width:420px){main,.header{width:90%}.section{padding:23px 20px}.header nav{gap:3px;padding:6px;border-radius:16px}.header nav a{font-size:14px;padding:12px 7px;border-radius:11px}.profile-links{gap:12px}.profile-links a{font-size:12px;padding:9px 12px}.publication{padding:18px 14px;gap:9px}.authors,.venue{font-size:13px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}.js .reveal{opacity:1;transform:none}}
 @media print{body{background:white}.header nav,.profile-links{display:none}.section[hidden]{display:block!important}.section,.publication,.interests li{box-shadow:none;background:white;border:1px solid #ddd}.section{break-before:page;margin:0;padding:24px}.section:first-child{break-before:auto}.publication{break-inside:avoid}.js .reveal{opacity:1;transform:none}main,.header{width:100%}.header{margin:0 0 24px}}
